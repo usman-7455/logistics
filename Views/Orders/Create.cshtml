@@ -1,0 +1,113 @@
+﻿@model logistics.Models.ViewModels.OrderCreateViewModel
+
+@{
+    ViewData["Title"] = "Create Order";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Create New Order</h2>
+
+    <!-- Validation Errors (Only shows a red text message if there is an actual error) -->
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="row">
+        <!-- LEFT COLUMN: Add Items to Cart -->
+        <div class="col-md-5">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Add Items to Cart</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddToCart" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Select Product</label>
+                            <select name="ProductId" class="form-select" required>
+                                <option value="">-- Choose Product --</option>
+                                @foreach (var p in ViewBag.Products as IEnumerable<logistics.Models.Product>)
+                                {
+                                    <option value="@p.Id">@p.Name (Stock: @p.StockQuantity) - @p.Price.ToString("C")</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" name="Quantity" class="form-control" min="1" value="1" required />
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary w-100">Add to Cart</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Cart & Checkout -->
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white d-flex justify-content-between">
+                    <h5 class="mb-0">Current Cart</h5>
+                    <h5 class="mb-0">Total: @Model.OrderTotal.ToString("C")</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.CartItems.Any())
+                    {
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Subtotal</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.CartItems)
+                                {
+                                    <tr>
+                                        <td>@item.ProductName</td>
+                                        <td>@item.UnitPrice.ToString("C")</td>
+                                        <td>@item.Quantity</td>
+                                        <td>@item.Subtotal.ToString("C")</td>
+                                        <td>
+                                            <form asp-action="RemoveFromCart" method="post" class="d-inline">
+                                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        <!-- Checkout Form -->
+                        <form asp-action="Checkout" method="post" class="mt-4 border-top pt-3">
+                            @Html.AntiForgeryToken()
+                            <div class="mb-3">
+                                <label asp-for="CustomerId" class="form-label fw-bold">Select Customer</label>
+                                <select asp-for="CustomerId" class="form-select" required>
+                                    <option value="">-- Choose Customer --</option>
+                                    @foreach (var c in ViewBag.Customers as IEnumerable<logistics.Models.Customer>)
+                                    {
+                                        <option value="@c.Id">@c.FullName (@c.Email)</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CustomerId" class="text-danger"></span>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 btn-lg">Complete Order</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4">Your cart is empty. Add products from the left.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,64 @@
+﻿@model List<logistics.Models.ViewModels.PendingShipmentViewModel>
+
+@{
+    ViewData["Title"] = "Pending Shipments";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-truck"></i> Pending Shipments</h2>
+        <a asp-action="Track" class="btn btn-outline-primary">
+            <i class="bi bi-search"></i> Track a Package
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Order Date</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var shipment in Model)
+                        {
+                            <tr>
+                                <td>#@shipment.OrderId</td>
+                                <td>@shipment.CustomerName</td>
+                                <td>@shipment.OrderDate.ToString("MMM dd, yyyy")</td>
+                                <td>@shipment.TotalAmount.ToString("C")</td>
+                                <td><span class="badge bg-warning text-dark">@shipment.CurrentStatus</span></td>
+                                <td>
+                                    <a asp-action="AssignDriver" asp-route-id="@shipment.ShipmentId" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-person-plus"></i> Assign Driver
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted text-center py-4">No pending shipments at this time. All caught up!</p>
+            }
+        </div>
+    </div>
+</div>
