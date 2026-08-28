@@ -15,6 +15,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderService, OrderService>(); // <-- ADDED ORDER SERVICE
 builder.Services.AddScoped<IShipmentService, ShipmentService>();
+// Register the Background Service for auto-completing deliveries
+builder.Services.AddHostedService<logistics.Services.Background.ShipmentDeliveryService>();
 
 // 4. Add Session Services (REQUIRED for the shopping cart)
 builder.Services.AddSession(options =>

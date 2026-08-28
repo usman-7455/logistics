@@ -16,12 +16,16 @@ namespace logistics.Services
 
         public async Task<List<Customer>> GetCustomersAsync()
         {
-            return await _context.Customers.OrderBy(c => c.FullName).ToListAsync();
+            return await _context.Customers
+                .AsNoTracking() // Always fetch fresh data
+                .OrderBy(c => c.FullName)
+                .ToListAsync();
         }
 
         public async Task<List<Product>> GetAvailableProductsAsync()
         {
             return await _context.Products
+                .AsNoTracking() // Always fetch fresh data
                 .Where(p => p.StockQuantity > 0)
                 .OrderBy(p => p.Name)
                 .ToListAsync();
@@ -54,9 +58,9 @@ namespace logistics.Services
                 };
 
                 _context.Orders.Add(order);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
 
-               
+                // 3. Create Order Items and Deduct Stock
                 foreach (var item in cartItems)
                 {
                     var orderItem = new OrderItem
@@ -64,7 +68,7 @@ namespace logistics.Services
                         OrderId = order.Id,
                         ProductId = item.ProductId,
                         Quantity = item.Quantity,
-                        UnitPrice = item.UnitPrice
+                        UnitPrice = item.UnitPrice // Note: Ensure your model has UnitPrice, not Price
                     };
                     _context.OrderItems.Add(orderItem);
 
@@ -91,22 +95,27 @@ namespace logistics.Services
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                
                 return (false, $"An error occurred: {ex.InnerException?.Message ?? ex.Message}");
             }
         }
 
         public async Task<List<OrderSummaryViewModel>> GetAllOrdersAsync()
         {
+            // MAGIC FIX: .AsNoTracking() forces EF Core to bypass its memory cache 
+            // and always pull the absolute latest data from the SQL database.
             var orders = await _context.Orders
+                .AsNoTracking()
                 .Include(o => o.Customer)
+                .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
             var result = new List<OrderSummaryViewModel>();
 
             foreach (var order in orders)
             {
+                // Also use AsNoTracking() here to ensure the shipment lookup is fresh
                 var trackingCode = await _context.Shipments
+                    .AsNoTracking()
                     .Where(s => s.OrderId == order.Id)
                     .Select(s => s.TrackingCode)
                     .FirstOrDefaultAsync();
@@ -123,7 +132,7 @@ namespace logistics.Services
                 });
             }
 
-            return result.OrderByDescending(o => o.OrderDate).ToList();
+            return result;
         }
     }
 }
