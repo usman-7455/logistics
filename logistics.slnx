@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="../logistics.Tests/logistics.Tests.csproj" Id="77b1a63f-7980-4289-89f1-6745e50d0345" />
   <Project Path="logistics.csproj" />
 </Solution>
