@@ -7,40 +7,115 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/logistics.styles.css" asp-append-version="true" />
-    <!-- Added Bootstrap Icons for a professional admin portal look -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+            /* Premium Navbar Styling */
+            .premium-navbar {
+                background-color: #1e293b !important; /* Deep professional slate */
+                border-bottom: 3px solid #0d6efd; /* Primary brand accent matching table headers */
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            }
+
+                .premium-navbar .navbar-brand {
+                    color: #ffffff !important;
+                    font-weight: 700;
+                    font-size: 1.25rem;
+                    letter-spacing: 0.5px;
+                    transition: all 0.3s ease;
+                }
+
+                    .premium-navbar .navbar-brand:hover {
+                        color: #60a5fa !important; /* Lighter blue on hover */
+                        transform: translateY(-1px);
+                    }
+
+                .premium-navbar .nav-link {
+                    color: #cbd5e1 !important; /* Soft gray for inactive links */
+                    font-weight: 500;
+                    padding: 0.6rem 1rem !important;
+                    border-radius: 8px;
+                    transition: all 0.3s ease;
+                    margin: 0 0.25rem;
+                }
+
+                    .premium-navbar .nav-link:hover {
+                        color: #ffffff !important;
+                        background-color: rgba(255, 255, 255, 0.1);
+                    }
+
+                    .premium-navbar .nav-link.active {
+                        color: #ffffff !important;
+                        background-color: #0d6efd; /* Primary blue for active state */
+                        box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+                    }
+
+                .premium-navbar .navbar-toggler {
+                    border-color: rgba(255, 255, 255, 0.2);
+                }
+
+                .premium-navbar .navbar-toggler-icon {
+                    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+                }
+
+            /* Main Content Background */
+            body {
+                background-color: #f8fafc; /* Very light slate background for the whole app */
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            main {
+                flex: 1;
+            }
+
+            .footer {
+                background-color: #ffffff;
+                border-top: 1px solid #e2e8f0;
+                padding: 1.5rem 0;
+                color: #64748b;
+                font-size: 0.9rem;
+            }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand fw-bold text-primary" asp-area="" asp-controller="Products" asp-action="Index">
-                    <i class="bi bi-box-seam"></i> Mini Logistics
+        <nav class="navbar navbar-expand-lg premium-navbar">
+            <div class="container-fluid px-3 px-md-4">
+                <a class="navbar-brand" asp-area="" asp-controller="Products" asp-action="Index">
+                    <i class="bi bi-box-seam-fill me-2"></i>Mini Logistics
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index">
-                                <i class="bi bi-grid-3x3-gap"></i> Products
+                            <a class="nav-link" asp-area="" asp-controller="Products" asp-action="Index">
+                                <i class="bi bi-grid-3x3-gap me-1"></i> Products
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="Index">
-                                <i class="bi bi-receipt"></i> All Orders
+                            <a class="nav-link" asp-area="" asp-controller="Orders" asp-action="Index">
+                                <i class="bi bi-receipt me-1"></i> All Orders
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="Create">
-                                <i class="bi bi-cart-plus"></i> Create Order
+                            <a class="nav-link" asp-area="" asp-controller="Orders" asp-action="Create">
+                                <i class="bi bi-cart-plus me-1"></i> Create Order
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Shipments" asp-action="Index">
-                                <i class="bi bi-truck"></i> Pending Shipments
+                            <a class="nav-link" asp-area="" asp-controller="Shipments" asp-action="Index">
+                                <i class="bi bi-truck me-1"></i> Pending Shipments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Shipments" asp-action="Track">
+                                <i class="bi bi-geo-alt me-1"></i> Track Package
                             </a>
                         </li>
                     </ul>
@@ -48,17 +123,19 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+    <div class="container-fluid px-0">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted mt-5">
-        <div class="container">
-            &copy; 2026 - Mini Logistics Admin Portal
+    <footer class="footer mt-auto">
+        <div class="container text-center">
+            <span>&copy; 2026 - <strong>Mini Logistics</strong> Admin Portal. All rights reserved.</span>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
