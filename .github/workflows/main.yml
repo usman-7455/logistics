@@ -1,0 +1,35 @@
+name: Build and deploy .NET Core app to Azure Web App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x' # Change to 7.0 or 6.0 if you didn't use .NET 8
+
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+
+    - name: dotnet publish
+      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        
+        app-name: 'mini-logistics-portal-2026' 
+        
+       
+        publish-profile: ${{ secrets.AZURE_LOGISTICS_CICD }} 
+        
+        package: ${{env.DOTNET_ROOT}}/myapp
