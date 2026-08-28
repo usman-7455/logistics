@@ -24,7 +24,9 @@ namespace logistics.Controllers
         private List<CartLineItemViewModel> GetCart()
         {
             var cartJson = HttpContext.Session.GetString(CartSessionKey);
-            return cartJson == null ? new List<CartLineItemViewModel>() : JsonSerializer.Deserialize<List<CartLineItemViewModel>>(cartJson);
+            return string.IsNullOrEmpty(cartJson)
+    ? new List<CartLineItemViewModel>()
+    : JsonSerializer.Deserialize<List<CartLineItemViewModel>>(cartJson) ?? new List<CartLineItemViewModel>();
         }
 
         private void SaveCart(List<CartLineItemViewModel> cart)
