@@ -1,6 +1,3 @@
-Here is the complete, professional `README.md` file in Markdown format. It includes your live Azure deployment link, contains no emojis, excludes all references to unit testing, and follows standard enterprise documentation practices.
-
-```markdown
 # Mini Logistics Management System
 
 A comprehensive ASP.NET Core MVC web application designed for managing end-to-end logistics operations. The system handles product inventory, customer order processing, shipment tracking, and automated delivery status updates.
