@@ -1,7 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace logistics.Models
 {
+
+    [Index(nameof(TrackingCode), IsUnique = true)]
+    [Index(nameof(OrderId))]
+    [Index(nameof(ShipmentStatus))]
     public class Shipment
     {
         public int Id { get; set; }

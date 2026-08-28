@@ -9,32 +9,38 @@ namespace logistics.Services
     {
         private readonly ApplicationDbContext _context;
 
-        // Constructor Injection (Industry Standard for Dependency Injection)
         public ProductService(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<List<ProductViewModel>> GetAllProductsAsync()
+        // This now perfectly matches the interface
+        public async Task<(List<Product> Products, int TotalCount)> GetProductsAsync(
+            string searchString = null,
+            int pageNumber = 1,
+            int pageSize = 10)
         {
-            // We project the Entity directly to the ViewModel using LINQ.
-            // This is highly efficient because it only fetches the columns we need from SQL Server.
-            return await _context.Products
-                .Select(p => new ProductViewModel
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Price = p.Price,
-                    StockQuantity = p.StockQuantity
-                    // Note: IsLowStock is calculated automatically in the ViewModel 
-                    // based on StockQuantity < 5, satisfying the PDF requirement.
-                })
+            var query = _context.Products.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(p => p.Name.Contains(searchString));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var products = await query
+                .OrderBy(p => p.Name)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            return (products, totalCount);
         }
 
+        // FIXED: Renamed from CreateAllProductAsync to CreateProductAsync
         public async Task<bool> CreateProductAsync(CreateProductViewModel model)
         {
-            // Map the ViewModel back to the Domain Entity
             var product = new Product
             {
                 Name = model.Name,
@@ -43,8 +49,6 @@ namespace logistics.Services
             };
 
             _context.Products.Add(product);
-
-            // Save changes to the database
             await _context.SaveChangesAsync();
 
             return true;

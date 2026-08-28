@@ -15,9 +15,45 @@ namespace logistics.Services
             _context = context;
         }
 
+        // --- NEW: Search and Filter Method ---
+        public async Task<(List<Shipment> Shipments, int TotalCount)> GetShipmentsAsync(
+            string searchString = null,
+            string statusFilter = null,
+            int pageNumber = 1,
+            int pageSize = 10)
+        {
+            var query = _context.Shipments
+                .Include(s => s.Order)
+                .ThenInclude(o => o.Customer)
+                .AsQueryable();
+
+            // Search by Tracking Code
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(s => s.TrackingCode != null && s.TrackingCode.Contains(searchString));
+            }
+
+            // Filter by Status
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                var status = Enum.Parse<ShipmentStatus>(statusFilter);
+                query = query.Where(s => s.ShipmentStatus == status);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var shipments = await query
+                .OrderByDescending(s => s.Order.OrderDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (shipments, totalCount);
+        }
+        // ---------------------------------------
+
         public async Task<List<PendingShipmentViewModel>> GetPendingShipmentsAsync()
         {
-            // Fetch shipments that are currently 'InTransit' (waiting for driver assignment/dispatch)
             return await _context.Shipments
                 .Include(s => s.Order)
                 .ThenInclude(o => o.Customer)
@@ -39,17 +75,14 @@ namespace logistics.Services
             var shipment = await _context.Shipments.FindAsync(model.ShipmentId);
             if (shipment == null) return false;
 
-            // 1. Generate Tracking Code: TRK-YYYYMMDD-XXXX
             string datePart = DateTime.UtcNow.ToString("yyyyMMdd");
             int randomPart = _random.Next(1000, 9999);
             shipment.TrackingCode = $"TRK-{datePart}-{randomPart}";
 
-            // 2. Assign Driver and Update Status
             shipment.DriverName = model.DriverName;
             shipment.EstimatedDeliveryTime = model.EstimatedDeliveryTime;
-            shipment.ShipmentStatus = ShipmentStatus.OutForDelivery; // Move to next stage
+            shipment.ShipmentStatus = ShipmentStatus.OutForDelivery;
 
-            // 3. Update the Order status to Shipped as well
             var order = await _context.Orders.FindAsync(shipment.OrderId);
             if (order != null)
             {
@@ -79,8 +112,6 @@ namespace logistics.Services
                 EstimatedDeliveryTime = shipment.EstimatedDeliveryTime,
                 CustomerName = shipment.Order?.Customer?.FullName ?? "Unknown",
                 CustomerEmail = shipment.Order?.Customer?.Email ?? "Unknown",
-
-                // Safe navigation to prevent NullReferenceException
                 OrderItemsSummary = shipment.Order?.OrderItems?
                     .Select(oi => $"{oi.Quantity}x {oi.Product?.Name ?? "Unknown Product"}")
                     .ToList() ?? new List<string>()
@@ -95,13 +126,11 @@ namespace logistics.Services
 
             if (shipment == null || shipment.ShipmentStatus == ShipmentStatus.Delivered)
             {
-                return false; // Already delivered or not found
+                return false;
             }
 
-            // Update Shipment Status
             shipment.ShipmentStatus = ShipmentStatus.Delivered;
 
-            // Update the related Order Status as well
             if (shipment.Order != null)
             {
                 shipment.Order.Status = OrderStatus.Delivered;

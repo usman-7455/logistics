@@ -14,10 +14,19 @@ namespace logistics.Controllers
             _productService = productService;
         }
 
-        // GET: /Products
-        public async Task<IActionResult> Index()
+        // GET: /Products (Updated with Search and Pagination)
+        public async Task<IActionResult> Index(string searchString, int pageNumber = 1)
         {
-            var products = await _productService.GetAllProductsAsync();
+            int pageSize = 10; // Show 10 products per page
+
+            // Call the new method and deconstruct the tuple (products list, total count)
+            var (products, totalCount) = await _productService.GetProductsAsync(searchString, pageNumber, pageSize);
+
+            // Pass data to the View for the search box and pagination buttons
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["TotalPages"] = (int)Math.Ceiling(totalCount / (double)pageSize);
+            ViewData["CurrentPage"] = pageNumber;
+
             return View(products);
         }
 

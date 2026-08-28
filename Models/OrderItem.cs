@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace logistics.Models
 {
@@ -21,5 +22,8 @@ namespace logistics.Models
         [Required]
         [Range(0.01, double.MaxValue)]
         public decimal UnitPrice { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Price { get; set; }
     }
 }

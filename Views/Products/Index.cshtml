@@ -1,51 +1,86 @@
-﻿@model List<logistics.Models.ViewModels.ProductViewModel>
+﻿@model List<logistics.Models.Product>
 
 @{
-    ViewData["Title"] = "Product Catalog";
-    Layout = "_Layout"; // Uses the shared layout for navbar/styling
+    ViewData["Title"] = "Products";
+    Layout = "_Layout";
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Product Catalog & Inventory</h2>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add New Product
-        </a>
+    <!-- Header with Search -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-grid-3x3-gap"></i> Products</h2>
+
+        <!-- Search Form -->
+        <form asp-action="Index" method="get" class="d-flex gap-2">
+            <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
+                   class="form-control" placeholder="Search products by name..."
+                   style="width: 300px;" />
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Search
+            </button>
+            @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"] as string))
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Clear
+                </a>
+            }
+        </form>
     </div>
 
+    <!-- Products Table -->
     <div class="card shadow-sm">
         <div class="card-body">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Product Name</th>
-                        <th>Unit Price</th>
-                        <th>Current Stock</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var product in Model)
-                    {
-                        <!-- Highlight row if low stock -->
-                        <tr class="@(product.IsLowStock ? "table-warning" : "")">
-                            <td>@product.Name</td>
-                            <td>@product.Price.ToString("C")</td>
-                            <td>@product.StockQuantity</td>
-                            <td>
-                                @if (product.IsLowStock)
-                                {
-                                    <span class="badge bg-danger">Low Stock</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-success">In Stock</span>
-                                }
-                            </td>
+            @if (Model.Any())
+            {
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Stock Quantity</th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            // Logic to highlight low/out of stock rows
+                            string rowClass = "";
+                            if (product.StockQuantity < 5)
+                            {
+                                rowClass = "table-warning"; // Yellow background
+                            }
+
+                            <tr class="@rowClass">
+                                <td><strong>@product.Name</strong></td>
+                                <td>@product.Price.ToString("C")</td>
+                                <td>@product.StockQuantity</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox display-4 text-muted"></i>
+                    <h5 class="text-muted mt-3">
+                        @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"] as string))
+                        {
+                            <span>No products found matching "@ViewData["CurrentFilter"]"</span>
+                        }
+                        else
+                        {
+                            <span>No products available</span>
+                        }
+                    </h5>
+                    @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"] as string))
+                    {
+                        <a asp-action="Index" class="btn btn-outline-primary mt-2">
+                            <i class="bi bi-x-circle"></i> Clear Search
+                        </a>
                     }
-                </tbody>
-            </table>
+                </div>
+            }
         </div>
     </div>
 </div>

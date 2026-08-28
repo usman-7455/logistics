@@ -1,7 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace logistics.Models
 {
+
+    [Index(nameof(Name))]
     public class Product
     {
         public int Id { get; set; }

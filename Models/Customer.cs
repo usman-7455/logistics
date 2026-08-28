@@ -1,7 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace logistics.Models
 {
+
+    [Index(nameof(Email), IsUnique = true)]
     public class Customer
     {
         public int Id { get; set; }

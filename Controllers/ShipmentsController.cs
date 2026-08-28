@@ -13,10 +13,22 @@ namespace logistics.Controllers
             _shipmentService = shipmentService;
         }
 
-        // GET: /Shipments (List pending shipments)
-        public async Task<IActionResult> Index()
+        // GET: /Shipments (List pending shipments with Search)
+        public async Task<IActionResult> Index(string searchString = null)
         {
+            // 1. Fetch the pending shipments (Returns List<PendingShipmentViewModel>)
             var shipments = await _shipmentService.GetPendingShipmentsAsync();
+
+            // 2. Apply search filter in memory if the user typed something
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                shipments = shipments.Where(s =>
+                    s.CustomerName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                    s.OrderId.ToString().Contains(searchString)
+                ).ToList();
+            }
+
+            // 3. Pass the correct model type back to the View
             return View(shipments);
         }
 
@@ -45,26 +57,21 @@ namespace logistics.Controllers
         }
 
         // GET: /Shipments/Track 
-        // This single method handles BOTH the empty search form AND the search results
         public async Task<IActionResult> Track(string code)
         {
-            // 1. If no code is provided, just show the empty search form (Model will be null)
             if (string.IsNullOrWhiteSpace(code))
             {
                 return View();
             }
 
-            // 2. If a code IS provided, search for it in the database
             var result = await _shipmentService.GetTrackingInfoAsync(code);
 
-            // 3. If not found, show the form again with an error message
             if (result == null)
             {
                 ViewBag.Error = "Tracking code not found. Please check the code and try again.";
                 return View();
             }
 
-            // 4. Success! Pass the result to the view to display the tracking details
             return View(result);
         }
 
@@ -81,7 +88,6 @@ namespace logistics.Controllers
                     TempData["SuccessMessage"] = "Shipment marked as Delivered successfully!";
                 }
             }
-            // Redirect back to the tracking page to show the updated status
             return RedirectToAction(nameof(Track), new { code = code });
         }
     }

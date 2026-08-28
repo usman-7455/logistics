@@ -1,7 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace logistics.Models
 {
+
+
+    [Index(nameof(CustomerId))]
+    [Index(nameof(Status))]
+    [Index(nameof(OrderDate))]
     public class Order
     {
         public int Id { get; set; }
