@@ -197,12 +197,3 @@ logistics/
 ├── Program.cs
 └── logistics.csproj
 ```
-
-## License
-
-This project is open source and available under the MIT License.
-
-## Support
-
-For issues, questions, or contributions, please open an issue on the GitHub repository.
-```
