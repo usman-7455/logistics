@@ -1,25 +1,27 @@
-﻿using logistics.Models.ViewModels;
+﻿using logistics.Data;
+using logistics.Models.ViewModels;
 using logistics.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace logistics.Controllers
 {
     public class ShipmentsController : Controller
     {
         private readonly IShipmentService _shipmentService;
+        private readonly ApplicationDbContext _context;
 
-        public ShipmentsController(IShipmentService shipmentService)
+        public ShipmentsController(IShipmentService shipmentService, ApplicationDbContext context)
         {
             _shipmentService = shipmentService;
+            _context = context;
         }
 
         // GET: /Shipments (List pending shipments with Search)
         public async Task<IActionResult> Index(string searchString = null)
         {
-            // 1. Fetch the pending shipments (Returns List<PendingShipmentViewModel>)
             var shipments = await _shipmentService.GetPendingShipmentsAsync();
 
-            
             if (!string.IsNullOrEmpty(searchString))
             {
                 shipments = shipments.Where(s =>
@@ -28,9 +30,9 @@ namespace logistics.Controllers
                 ).ToList();
             }
 
-           
             return View(shipments);
         }
+
         // GET: /Shipments/SearchShipments (Dynamic AJAX Endpoint)
         public async Task<IActionResult> SearchShipments(string searchString)
         {
@@ -39,7 +41,6 @@ namespace logistics.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                // Remove spaces and make lowercase for accurate "StartsWith" matching
                 var cleanSearch = searchString.Replace(" ", "").ToLower();
 
                 shipments = shipments.Where(s =>
@@ -48,15 +49,29 @@ namespace logistics.Controllers
                 ).ToList();
             }
 
-            // Return only the partial view containing the table
             return PartialView("_PendingShipmentTable", shipments);
         }
 
         // GET: /Shipments/AssignDriver/5
-        public IActionResult AssignDriver(int id)
+        public async Task<IActionResult> AssignDriver(int id)
         {
-            
-            return View(new AssignDriverViewModel { ShipmentId = id });
+            // Fetch the shipment and its related order to get the actual OrderDate
+            var shipment = await _context.Shipments
+                .Include(s => s.Order)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            // Calculate minimum delivery date: Order Date + 1 Day. 
+            // Fallback to tomorrow if shipment/order isn't found for safety.
+            var minDate = shipment?.Order?.OrderDate.AddDays(1) ?? DateTime.Now.AddDays(1);
+
+            var model = new AssignDriverViewModel
+            {
+                ShipmentId = id,
+                MinDeliveryDate = minDate,
+                EstimatedDeliveryTime = minDate // Sets a logical default value so the picker isn't empty
+            };
+
+            return View(model);
         }
 
         // POST: /Shipments/AssignDriver

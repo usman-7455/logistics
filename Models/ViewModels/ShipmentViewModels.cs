@@ -24,6 +24,8 @@ namespace logistics.Models.ViewModels
         [Required(ErrorMessage = "Estimated delivery time is required")]
         [DataType(DataType.DateTime)]
         public DateTime EstimatedDeliveryTime { get; set; }
+
+        public DateTime MinDeliveryDate { get; set; }
     }
 
     // 3. For the Tracking Lookup result
