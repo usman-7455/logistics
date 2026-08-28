@@ -5,97 +5,279 @@
     Layout = "_Layout";
 }
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <!-- Search Form -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-dark text-white">
-                    <h4 class="mb-0"><i class="bi bi-search"></i> Track Your Package</h4>
+<style>
+    /* Elegant Card Header */
+    .elegant-card-header {
+        background: #1e293b; /* Deep professional slate */
+        color: #f8f9fa;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 3px solid #0d6efd; /* Subtle primary brand accent */
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Modern Form Controls */
+    .modern-input {
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        padding: 0.85rem 1rem;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        width: 100%;
+        font-size: 1rem;
+    }
+
+        .modern-input:focus {
+            background: #ffffff;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+            outline: none;
+        }
+
+    /* Modern Buttons */
+    .btn-modern-primary {
+        border-radius: 10px;
+        padding: 0.85rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 1rem;
+    }
+
+        .btn-modern-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+        }
+
+    .btn-modern-success {
+        border-radius: 10px;
+        padding: 0.85rem 1.5rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+        border: none;
+        background: #198754;
+        color: white;
+    }
+
+        .btn-modern-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+            background: #157347;
+            color: white;
+        }
+
+    /* Info Boxes */
+    .info-box {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        height: 100%;
+        border: 1px solid #e9ecef;
+    }
+
+    .info-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0;
+    }
+
+    /* Modern List Items */
+    .modern-list-item {
+        background: #f8f9fa;
+        border: none;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        padding: 0.75rem 1rem;
+        color: #334155;
+        font-weight: 500;
+    }
+
+    /* Admin Action Box */
+    .admin-action-box {
+        background: #f8f9fa;
+        border: 1px dashed #adb5bd;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .success-box {
+        background: #d1e7dd;
+        border: 1px solid #badbcc;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .tracking-code-badge {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        letter-spacing: 0.5px;
+    }
+</style>
+
+<div class="container-fluid px-3 px-md-4 py-4">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-12">
+            <h2 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-geo-alt me-2 text-primary"></i>Track Shipment
+            </h2>
+            <p class="text-muted mb-0 mt-1 small">Enter a tracking code to view real-time delivery status</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center g-4">
+        <!-- Search Form Section -->
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                <div class="elegant-card-header d-flex align-items-center">
+                    <i class="bi bi-search me-2"></i> Track Your Package
                 </div>
-                <div class="card-body">
-                    <form asp-action="Track" method="get" class="d-flex gap-2">
-                        <input type="text" name="code" class="form-control" placeholder="Enter Tracking Code (e.g., TRK-20260828-1234)" value="@Model?.TrackingCode" required />
-                        <button type="submit" class="btn btn-primary">Track</button>
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Track" method="get" class="d-flex flex-column flex-md-row gap-3">
+                        <div class="flex-grow-1">
+                            <input type="text" name="code" class="form-control modern-input"
+                                   placeholder="Enter Tracking Code (e.g., TRK-20260828-1234)"
+                                   value="@Model?.TrackingCode" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-modern-primary">
+                            <i class="bi bi-search me-2"></i>Track
+                        </button>
                     </form>
 
                     @if (ViewBag.Error != null)
                     {
-                        <div class="alert alert-danger mt-3 mb-0">@ViewBag.Error</div>
+                        <div class="alert alert-danger border-0 shadow-sm rounded-3 d-flex align-items-center mt-4 mb-0" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                            <div>@ViewBag.Error</div>
+                        </div>
                     }
                 </div>
             </div>
+        </div>
 
-            <!-- Tracking Results -->
-            @if (Model != null)
-            {
-                <div class="card shadow-sm border-primary">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">Tracking Details</h4>
-                        <span class="badge bg-light text-dark fs-6">@Model.TrackingCode</span>
+        <!-- Tracking Results Section -->
+        @if (Model != null)
+        {
+            <div class="col-12 col-lg-8">
+                <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                    <div class="elegant-card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span><i class="bi bi-box-seam me-2"></i>Tracking Details</span>
+                        <span class="tracking-code-badge">@Model.TrackingCode</span>
                     </div>
-                    <div class="card-body">
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <h6 class="text-muted">Delivery Status</h6>
-                                <h3 class="text-primary fw-bold">@Model.Status</h3>
+
+                    <div class="card-body p-4 p-md-5">
+                        <!-- Status & ETA Row -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <div class="info-box">
+                                    <div class="info-label">Delivery Status</div>
+                                    <div class="info-value text-primary">
+                                        @if (Model.Status == "Delivered")
+                                        {
+                                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        }
+                                        else if (Model.Status == "OutForDelivery")
+                                        {
+
+                                            <i class="bi bi-truck me-2"></i>
+                                        }
+                                        else
+                                        {
+
+                                            <i class="bi bi-clock-fill me-2"></i>
+                                        }
+                                        @Model.Status
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <h6 class="text-muted">Estimated Delivery</h6>
-                                <h5>@Model.EstimatedDeliveryTime?.ToString("MMM dd, yyyy - hh:mm tt")</h5>
+                            <div class="col-12 col-md-6">
+                                <div class="info-box">
+                                    <div class="info-label">Estimated Delivery</div>
+                                    <div class="info-value fs-5">
+                                        @Model.EstimatedDeliveryTime?.ToString("MMM dd, yyyy - hh:mm tt")
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <hr />
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6 class="text-muted mb-2">Customer Details</h6>
-                                <p class="mb-1"><strong>Name:</strong> @Model.CustomerName</p>
-                                <p class="mb-0"><strong>Email:</strong> @Model.CustomerEmail</p>
+                        <!-- Customer & Driver Info -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <div class="info-box">
+                                    <div class="info-label"><i class="bi bi-person-fill me-1"></i> Customer Details</div>
+                                    <p class="mb-1 fw-semibold text-dark">@Model.CustomerName</p>
+                                    <p class="mb-0 text-muted small">@Model.CustomerEmail</p>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <h6 class="text-muted mb-2">Driver Information</h6>
-                                <p class="mb-0"><strong>Assigned Driver:</strong> @Model.DriverName</p>
+                            <div class="col-12 col-md-6">
+                                <div class="info-box">
+                                    <div class="info-label"><i class="bi bi-person-badge-fill me-1"></i> Driver Information</div>
+                                    <p class="mb-0 fw-semibold text-dark">@Model.DriverName</p>
+                                </div>
                             </div>
                         </div>
 
-                        <hr />
-
-                        <h6 class="text-muted mb-2">Package Contents</h6>
-                        <ul class="list-group list-group-flush mb-4">
-                            @foreach (var item in Model.OrderItemsSummary)
-                            {
-                                <li class="list-group-item">@item</li>
-                            }
-                        </ul>
-
-                        <hr />
+                        <!-- Package Contents -->
+                        <div class="mb-4">
+                            <div class="info-label mb-3"><i class="bi bi-boxes me-1"></i> Package Contents</div>
+                            <div class="d-flex flex-column">
+                                @foreach (var item in Model.OrderItemsSummary)
+                                {
+                                    <div class="modern-list-item d-flex align-items-center">
+                                        <i class="bi bi-check2-circle text-primary me-2"></i> @item
+                                    </div>
+                                }
+                            </div>
+                        </div>
 
                         <!-- Admin Action: Mark as Delivered -->
                         @if (Model.Status != "Delivered")
                         {
-                            <div class="mt-3 p-3 bg-light rounded border">
-                                <h6 class="text-muted mb-2"><i class="bi bi-shield-lock"></i> Admin Action</h6>
-                                <p class="small text-muted mb-2">Click below to confirm the package has been successfully delivered to the customer.</p>
+                            <div class="admin-action-box">
+                                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-lock-fill text-primary me-2"></i> Admin Action</h6>
+                                <p class="small text-muted mb-3">Click below to confirm the package has been successfully delivered to the customer.</p>
                                 <form asp-action="MarkAsDelivered" method="post">
                                     <input type="hidden" name="code" value="@Model.TrackingCode" />
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-success w-100">
-                                        <i class="bi bi-check-circle"></i> Mark as Delivered
+                                    <button type="submit" class="btn btn-modern-success w-100">
+                                        <i class="bi bi-check-circle-fill me-2"></i> Mark as Delivered
                                     </button>
                                 </form>
                             </div>
                         }
                         else
                         {
-                            <div class="mt-3 p-3 bg-success bg-opacity-10 rounded border border-success text-center">
-                                <h5 class="text-success mb-0"><i class="bi bi-check-circle-fill"></i> This order has been successfully delivered!</h5>
+                            <div class="success-box text-center">
+                                <h5 class="text-success mb-0 fw-bold">
+                                    <i class="bi bi-check-circle-fill me-2"></i> This order has been successfully delivered!
+                                </h5>
                             </div>
                         }
                     </div>
                 </div>
-            }
-        </div>
+            </div>
+        }
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

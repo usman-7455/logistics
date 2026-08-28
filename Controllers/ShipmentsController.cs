@@ -19,7 +19,7 @@ namespace logistics.Controllers
             // 1. Fetch the pending shipments (Returns List<PendingShipmentViewModel>)
             var shipments = await _shipmentService.GetPendingShipmentsAsync();
 
-            // 2. Apply search filter in memory if the user typed something
+            
             if (!string.IsNullOrEmpty(searchString))
             {
                 shipments = shipments.Where(s =>
@@ -28,14 +28,14 @@ namespace logistics.Controllers
                 ).ToList();
             }
 
-            // 3. Pass the correct model type back to the View
+           
             return View(shipments);
         }
 
         // GET: /Shipments/AssignDriver/5
         public IActionResult AssignDriver(int id)
         {
-            // Pre-fill the ShipmentId so the form knows which one to update
+            
             return View(new AssignDriverViewModel { ShipmentId = id });
         }
 

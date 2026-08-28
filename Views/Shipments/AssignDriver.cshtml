@@ -5,33 +5,135 @@
     Layout = "_Layout";
 }
 
-<div class="container mt-4">
+<style>
+    /* Modern Form Controls (Matching Create Order) */
+    .modern-input {
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        width: 100%;
+        font-size: 0.95rem;
+    }
+
+        .modern-input:focus {
+            background: #ffffff;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+            outline: none;
+        }
+
+    /* Elegant Card Header */
+    .elegant-card-header {
+        background: #1e293b; /* Deep professional slate */
+        color: #f8f9fa;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 3px solid #0d6efd; /* Subtle primary brand accent */
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Modern Buttons */
+    .btn-modern-primary {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+        .btn-modern-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+        }
+
+    .btn-modern-secondary {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 1px solid #dee2e6;
+        background: #ffffff;
+        color: #495057;
+    }
+
+        .btn-modern-secondary:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            transform: translateY(-1px);
+        }
+
+    .validation-summary-custom {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 10px;
+        padding: 1rem;
+        color: #b91c1c;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="container-fluid px-3 px-md-4 py-4">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-12">
+            <h2 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-person-badge me-2 text-primary"></i>Assign Driver
+            </h2>
+            <p class="text-muted mb-0 mt-1 small">Generate a tracking code and assign a driver to this shipment</p>
+        </div>
+    </div>
+
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="bi bi-person-badge"></i> Assign Driver to Shipment #@Model.ShipmentId</h4>
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                <div class="elegant-card-header">
+                    <i class="bi bi-truck me-2"></i> Shipment #@Model.ShipmentId
                 </div>
-                <div class="card-body">
+
+                <div class="card-body p-4 p-md-5">
                     <form asp-action="AssignDriver" method="post">
                         <input type="hidden" asp-for="ShipmentId" />
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                        <div class="mb-3">
-                            <label asp-for="DriverName" class="form-label"></label>
-                            <input asp-for="DriverName" class="form-control" placeholder="e.g. John Doe" />
-                            <span asp-validation-for="DriverName" class="text-danger"></span>
+                        <!-- Validation Errors -->
+                        <div asp-validation-summary="ModelOnly" class="validation-summary-custom mb-4" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <span>Please correct the errors below and try again.</span>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="EstimatedDeliveryTime" class="form-label"></label>
-                            <input asp-for="EstimatedDeliveryTime" class="form-control" type="datetime-local" />
-                            <span asp-validation-for="EstimatedDeliveryTime" class="text-danger"></span>
+                        <div class="mb-4">
+                            <label asp-for="DriverName" class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-person-fill me-1 text-muted"></i> Driver Name
+                            </label>
+                            <input asp-for="DriverName" class="form-control modern-input" placeholder="e.g., John Doe" required />
+                            <span asp-validation-for="DriverName" class="text-danger small mt-1 d-block"></span>
+                        </div>
+                        <div class="mb-4">
+                            <label asp-for="EstimatedDeliveryTime" class="form-label fw-semibold text-dark mb-2">
+                                <i class="bi bi-calendar-event-fill me-1 text-muted"></i> Estimated Delivery Time
+                            </label>
+
+                            <!-- ADDED min AND max ATTRIBUTES HERE -->
+                            <input asp-for="EstimatedDeliveryTime"
+                                   class="form-control modern-input"
+                                   type="datetime-local"
+                                   min="2004-01-01T00:00"
+                                   max="2060-12-31T23:59"
+                                   required />
+
+                            <span asp-validation-for="EstimatedDeliveryTime" class="text-danger small mt-1 d-block"></span>
+                           
                         </div>
 
-                        <div class="d-flex justify-content-between">
-                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-success">Confirm & Generate Tracking Code</button>
+                        <div class="d-flex flex-column flex-sm-row justify-content-between gap-3 mt-5">
+                            <a asp-action="Index" class="btn btn-modern-secondary text-center">
+                                <i class="bi bi-x-lg me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-modern-primary text-center">
+                                <i class="bi bi-check-circle-fill me-2"></i>Confirm & Generate Tracking Code
+                            </button>
                         </div>
                     </form>
                 </div>

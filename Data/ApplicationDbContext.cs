@@ -1,18 +1,18 @@
-﻿using logistics.Models; // Updated to match your project name
+﻿using logistics.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace logistics.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        // The constructor is required for Dependency Injection
+        //  Dependency Injection
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
 
-        // Define a DbSet for each of your models. 
-        // These will become the tables in your SQL Server database.
+        
+        // Dbset tables in  SQL Server database.
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -23,7 +23,7 @@ namespace logistics.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Explicitly define decimal precision to avoid warnings (18 digits total, 2 decimal places)
+            
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.Property(p => p.Price).HasPrecision(18, 2);

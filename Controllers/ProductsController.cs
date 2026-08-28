@@ -8,7 +8,7 @@ namespace logistics.Controllers
     {
         private readonly IProductService _productService;
 
-        // Inject the service (Dependency Injection)
+        // (Dependency Injection)
         public ProductsController(IProductService productService)
         {
             _productService = productService;
@@ -17,12 +17,12 @@ namespace logistics.Controllers
         // GET: /Products (Updated with Search and Pagination)
         public async Task<IActionResult> Index(string searchString, int pageNumber = 1)
         {
-            int pageSize = 10; // Show 10 products per page
+            int pageSize = 10; 
 
-            // Call the new method and deconstruct the tuple (products list, total count)
+            
             var (products, totalCount) = await _productService.GetProductsAsync(searchString, pageNumber, pageSize);
 
-            // Pass data to the View for the search box and pagination buttons
+            
             ViewData["CurrentFilter"] = searchString;
             ViewData["TotalPages"] = (int)Math.Ceiling(totalCount / (double)pageSize);
             ViewData["CurrentPage"] = pageNumber;
@@ -38,7 +38,7 @@ namespace logistics.Controllers
 
         // POST: /Products/Create
         [HttpPost]
-        [ValidateAntiForgeryToken] // Security best practice
+        [ValidateAntiForgeryToken] 
         public async Task<IActionResult> Create(CreateProductViewModel model)
         {
             // Server-side validation check

@@ -54,9 +54,9 @@ namespace logistics.Services
                 };
 
                 _context.Orders.Add(order);
-                await _context.SaveChangesAsync(); // Save to get the Order.Id
+                await _context.SaveChangesAsync(); 
 
-                // 3. Create Order Items and Deduct Stock
+               
                 foreach (var item in cartItems)
                 {
                     var orderItem = new OrderItem
@@ -91,7 +91,7 @@ namespace logistics.Services
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                // Return the inner exception message so you can see exactly what SQL Server complained about
+                
                 return (false, $"An error occurred: {ex.InnerException?.Message ?? ex.Message}");
             }
         }

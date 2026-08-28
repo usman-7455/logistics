@@ -7,10 +7,10 @@ namespace logistics.Data
     {
         public static async Task SeedAsync(ApplicationDbContext context)
         {
-            // Ensure the database is created
+            
             await context.Database.MigrateAsync();
 
-            // 1. Seed Customers
+            
             if (!await context.Customers.AnyAsync())
             {
                 var customers = new List<Customer>
@@ -24,8 +24,7 @@ namespace logistics.Data
                 await context.SaveChangesAsync();
             }
 
-            // 2. Seed Products
-            // Note: We intentionally set some stock quantities below 5 to test the "Low Stock" highlight requirement later.
+           
             if (!await context.Products.AnyAsync())
             {
                 var products = new List<Product>

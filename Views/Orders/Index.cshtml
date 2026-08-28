@@ -5,21 +5,192 @@
     Layout = "_Layout";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2><i class="bi bi-receipt"></i> Order History</h2>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Create New Order
-        </a>
+<style>
+    /* Modern Table Styling */
+    .modern-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+        /* ELEGANT & CONTRASTING HEADER (Matching Products) */
+        .modern-table thead th {
+            background: #1e293b; /* Deep professional slate/dark blue */
+            border-bottom: 3px solid #0d6efd; /* Subtle primary brand accent */
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1.2px;
+            color: #f8f9fa; /* Crisp white text for high contrast */
+            padding: 1.25rem 1.5rem;
+            white-space: nowrap;
+        }
+
+        .modern-table tbody tr {
+            transition: all 0.2s ease;
+            background: #ffffff;
+        }
+
+            .modern-table tbody tr:hover {
+                background: #f8f9fa;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+                z-index: 1;
+                position: relative;
+            }
+
+        .modern-table td {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #f1f3f5;
+            vertical-align: middle;
+            white-space: nowrap;
+            color: #334155;
+        }
+
+    /* PENDING ORDER ROW HIGHLIGHTING */
+    .pending-order-row {
+        background-color: #e7f1ff !important; /* Soft blue background for pending */
+        border-left: 4px solid #0d6efd !important; /* Bold blue left accent */
+    }
+
+        .pending-order-row:hover {
+            background-color: #d0e4ff !important;
+        }
+
+    .search-container {
+        position: relative;
+    }
+
+    .search-input {
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        width: 100%;
+    }
+
+        .search-input:focus {
+            background: #ffffff;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+            outline: none;
+        }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .btn-add-order {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    @@media (min-width: 768px) {
+        .btn-add-order {
+            width: auto;
+        }
+    }
+
+    .btn-add-order:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .empty-state {
+        padding: 4rem 2rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 2px dashed #dee2e6;
+    }
+
+    /* RESPONSIVE TABLE ADJUSTMENTS */
+    @@media (max-width: 768px) {
+        .modern-table thead th, .modern-table td {
+            padding: 1rem 0.75rem;
+            font-size: 0.9rem;
+        }
+            /* Sticky first column for mobile scrolling */
+            .modern-table th:first-child,
+            .modern-table td:first-child {
+                position: sticky;
+                left: 0;
+                z-index: 2;
+                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            }
+
+        .modern-table th:first-child {
+            z-index: 3;
+            background: #1e293b !important; /* Keep header dark on mobile sticky */
+        }
+        /* Keep row highlight colors on sticky column */
+        .pending-order-row td:first-child {
+            background-color: #e7f1ff !important;
+        }
+
+        .pending-order-row:hover td:first-child {
+            background-color: #d0e4ff !important;
+        }
+    }
+</style>
+
+<div class="container-fluid px-3 px-md-4 py-4">
+    <!-- Header Section -->
+    <div class="row mb-4 align-items-center g-3">
+        <div class="col-12 col-md-6">
+            <h2 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-receipt me-2 text-primary"></i>Order History
+            </h2>
+            <p class="text-muted mb-0 mt-1 small">View and manage all customer orders</p>
+        </div>
+        <div class="col-12 col-md-6 text-md-end">
+            <a asp-action="Create" class="btn btn-primary btn-add-order">
+                <i class="bi bi-plus-lg me-2"></i>Create New Order
+            </a>
+        </div>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            @if (Model != null && Model.Any())
-            {
+    <!-- Search Section -->
+    <div class="row mb-4">
+        <div class="col-12 col-md-8 col-lg-6">
+            <form asp-action="Index" method="get" class="d-flex flex-column flex-md-row gap-2">
+                <div class="search-container flex-grow-1">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
+                           class="form-control form-control-lg search-input"
+                           placeholder="Search by customer name or Order ID..." />
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4" style="border-radius: 10px;">Search</button>
+                    @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"] as string))
+                    {
+                        <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="border-radius: 10px; width: 46px;">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-dark">
+                    <table class="table modern-table mb-0">
+                        <thead>
                             <tr>
                                 <th>Order ID</th>
                                 <th>Customer</th>
@@ -32,43 +203,59 @@
                         <tbody>
                             @foreach (var order in Model)
                             {
-                                <tr>
-                                    <td><strong>#@order.OrderId</strong></td>
+                                // Highlight Pending orders
+                                string rowClass = order.Status == "Pending" ? "pending-order-row" : "";
+
+                                <tr class="@rowClass">
                                     <td>
-                                        <div class="fw-bold">@order.CustomerName</div>
+                                        <div class="fw-bold text-dark">#@order.OrderId</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">@order.CustomerName</div>
                                         <small class="text-muted">@order.CustomerEmail</small>
                                     </td>
-                                    <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
-                                    <td class="fw-bold text-success">@order.TotalAmount.ToString("C")</td>
+                                    <td>
+                                        <span class="text-muted">@order.OrderDate.ToString("MMM dd, yyyy")</span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-success fs-6">@order.TotalAmount.ToString("C")</span>
+                                    </td>
                                     <td>
                                         @if (order.Status == "Pending")
                                         {
-                                            <span class="badge bg-warning text-dark">@order.Status</span>
+                                            <span class="badge bg-warning bg-opacity-10 text-dark px-3 py-2">
+                                                <i class="bi bi-clock-fill me-1"></i>@order.Status
+                                            </span>
                                         }
                                         else if (order.Status == "Shipped")
                                         {
-
-                                            <span class="badge bg-info text-dark">@order.Status</span>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                                <i class="bi bi-truck me-1"></i>@order.Status
+                                            </span>
                                         }
                                         else if (order.Status == "Delivered")
                                         {
-
-                                            <span class="badge bg-success">@order.Status</span>
+                                            <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">
+                                                <i class="bi bi-check-circle-fill me-1"></i>@order.Status
+                                            </span>
                                         }
                                         else
                                         {
-
-                                            <span class="badge bg-secondary">@order.Status</span>
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2">
+                                                @order.Status
+                                            </span>
                                         }
                                     </td>
                                     <td>
                                         @if (!string.IsNullOrEmpty(order.TrackingCode))
                                         {
-                                            <span class="badge bg-primary">@order.TrackingCode</span>
+                                            <span class="badge bg-light text-dark border px-3 py-2">
+                                                <i class="bi bi-upc-scan me-1"></i>@order.TrackingCode
+                                            </span>
                                         }
                                         else
                                         {
-                                            <span class="text-muted fst-italic">Pending Dispatch</span>
+                                            <span class="text-muted fst-italic small">Pending Dispatch</span>
                                         }
                                     </td>
                                 </tr>
@@ -76,11 +263,45 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+        <!-- Subtle footer info -->
+        <div class="text-muted mt-3 small d-none d-md-block">
+            <i class="bi bi-info-circle me-1"></i>
+            Showing @Model.Count orders. Rows highlighted in blue require immediate attention.
+        </div>
+    }
+    else
+    {
+        <!-- Premium Empty State -->
+        <div class="empty-state text-center">
+            <div class="bg-white rounded-circle d-inline-flex p-4 mb-3 shadow-sm">
+                <i class="bi bi-receipt display-4 text-muted"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-2">No orders found</h4>
+            <p class="text-muted mb-4">
+                @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"] as string))
+                {
+                    <span>We couldn't find any orders matching "<strong>@ViewData["CurrentFilter"]</strong>".</span>
+                }
+                else
+                {
+                    <span>No orders have been placed yet. Get started by creating your first order!</span>
+                }
+            </p>
+            @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"] as string))
+            {
+                <a asp-action="Index" class="btn btn-outline-primary px-4">
+                    <i class="bi bi-x-circle me-2"></i>Clear Search
+                </a>
             }
             else
             {
-                <p class="text-muted text-center py-4">No orders have been placed yet.</p>
+                <a asp-action="Create" class="btn btn-primary px-4">
+                    <i class="bi bi-plus-lg me-2"></i>Create Your First Order
+                </a>
             }
         </div>
-    </div>
+    }
 </div>

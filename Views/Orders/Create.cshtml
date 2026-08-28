@@ -5,109 +5,277 @@
     Layout = "_Layout";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-4">Create New Order</h2>
+<style>
+    /* Reuse Modern Table Styling for the Cart */
+    .modern-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        margin-bottom: 0;
+    }
 
-    <!-- Validation Errors (Only shows a red text message if there is an actual error) -->
-    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        .modern-table thead th {
+            background: #1e293b; /* Deep professional slate */
+            border-bottom: 3px solid #0d6efd;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            color: #f8f9fa;
+            padding: 1rem 1.25rem;
+            white-space: nowrap;
+        }
 
-    <div class="row">
-        <!-- LEFT COLUMN: Add Items to Cart -->
-        <div class="col-md-5">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Add Items to Cart</h5>
-                </div>
-                <div class="card-body">
-                    <form asp-action="AddToCart" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Select Product</label>
-                            <select name="ProductId" class="form-select" required>
-                                <option value="">-- Choose Product --</option>
-                                @foreach (var p in ViewBag.Products as IEnumerable<logistics.Models.Product>)
-                                {
-                                    <option value="@p.Id">@p.Name (Stock: @p.StockQuantity) - @p.Price.ToString("C")</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Quantity</label>
-                            <input type="number" name="Quantity" class="form-control" min="1" value="1" required />
-                        </div>
-                        <button type="submit" class="btn btn-outline-primary w-100">Add to Cart</button>
-                    </form>
-                </div>
-            </div>
+        .modern-table tbody tr {
+            transition: all 0.2s ease;
+            background: #ffffff;
+        }
+
+            .modern-table tbody tr:hover {
+                background: #f8f9fa;
+            }
+
+        .modern-table td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #f1f3f5;
+            vertical-align: middle;
+            color: #334155;
+        }
+
+    /* Modern Form Controls */
+    .modern-input, .modern-select {
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        width: 100%;
+        font-size: 0.95rem;
+    }
+
+        .modern-input:focus, .modern-select:focus {
+            background: #ffffff;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+            outline: none;
+        }
+
+    /* Elegant Card Headers */
+    .elegant-card-header {
+        background: #1e293b;
+        color: #f8f9fa;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 3px solid #0d6efd;
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Modern Buttons */
+    .btn-modern-primary {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+        .btn-modern-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+        }
+
+    .btn-modern-success {
+        border-radius: 10px;
+        padding: 0.85rem 1.5rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+        border: none;
+        background: #198754;
+        color: white;
+    }
+
+        .btn-modern-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+            background: #157347;
+        }
+
+    .btn-remove-item {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        border: 1px solid #ffcdd2;
+        color: #dc3545;
+        background: #fff5f5;
+    }
+
+        .btn-remove-item:hover {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+    .cart-total-badge {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .empty-cart-state {
+        padding: 3rem 1.5rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 2px dashed #dee2e6;
+    }
+</style>
+
+<div class="container-fluid px-3 px-md-4 py-4">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-12">
+            <h2 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-cart-plus me-2 text-primary"></i>Create New Order
+            </h2>
+            <p class="text-muted mb-0 mt-1 small">Select products, review the cart, and assign to a customer</p>
+        </div>
+    </div>
+
+    <!-- Validation Errors -->
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span>Please correct the errors below and try again.</6>
         </div>
 
-        <!-- RIGHT COLUMN: Cart & Checkout -->
-        <div class="col-md-7">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white d-flex justify-content-between">
-                    <h5 class="mb-0">Current Cart</h5>
-                    <h5 class="mb-0">Total: @Model.OrderTotal.ToString("C")</h5>
-                </div>
-                <div class="card-body">
-                    @if (Model.CartItems.Any())
-                    {
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Price</th>
-                                    <th>Qty</th>
-                                    <th>Subtotal</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in Model.CartItems)
-                                {
-                                    <tr>
-                                        <td>@item.ProductName</td>
-                                        <td>@item.UnitPrice.ToString("C")</td>
-                                        <td>@item.Quantity</td>
-                                        <td>@item.Subtotal.ToString("C")</td>
-                                        <td>
-                                            <form asp-action="RemoveFromCart" method="post" class="d-inline">
-                                                <input type="hidden" name="productId" value="@item.ProductId" />
-                                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-
-                        <!-- Checkout Form -->
-                        <form asp-action="Checkout" method="post" class="mt-4 border-top pt-3">
-                            @Html.AntiForgeryToken()
-                            <div class="mb-3">
-                                <label asp-for="CustomerId" class="form-label fw-bold">Select Customer</label>
-                                <select asp-for="CustomerId" class="form-select" required>
-                                    <option value="">-- Choose Customer --</option>
-                                    @foreach (var c in ViewBag.Customers as IEnumerable<logistics.Models.Customer>)
+        <div class="row g-4">
+            <!-- LEFT COLUMN: Add Items to Cart -->
+            <div class="col-12 col-lg-5">
+                <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                    <div class="elegant-card-header d-flex align-items-center">
+                        <i class="bi bi-plus-circle me-2"></i> Add Items to Cart
+                    </div>
+                    <div class="card-body p-4">
+                        <form asp-action="AddToCart" method="post">
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-dark mb-2">Select Product</label>
+                                <select name="ProductId" class="form-select modern-select" required>
+                                    <option value="">-- Choose a Product --</option>
+                                    @foreach (var p in ViewBag.Products as IEnumerable<logistics.Models.Product>)
                                     {
-                                        <option value="@c.Id">@c.FullName (@c.Email)</option>
+                                        <option value="@p.Id">@p.Name (Stock: @p.StockQuantity) - @p.Price.ToString("C")</option>
                                     }
                                 </select>
-                                <span asp-validation-for="CustomerId" class="text-danger"></span>
                             </div>
-                            <button type="submit" class="btn btn-success w-100 btn-lg">Complete Order</button>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-dark mb-2">Quantity</label>
+                                <input type="number" name="Quantity" class="form-control modern-input" min="1" value="1" required />
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-modern-primary w-100">
+                                <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                            </button>
                         </form>
-                    }
-                    else
-                    {
-                        <p class="text-muted text-center py-4">Your cart is empty. Add products from the left.</p>
-                    }
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Cart & Checkout -->
+            <div class="col-12 col-lg-7">
+                <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                    <div class="elegant-card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span><i class="bi bi-basket me-2"></i>Current Cart</span>
+                        <span class="cart-total-badge">
+                            Total: @Model.OrderTotal.ToString("C")
+                        </span>
+                    </div>
+                    <div class="card-body p-4">
+                        @if (Model.CartItems != null && Model.CartItems.Any())
+                        {
+                            <div class="table-responsive mb-4">
+                                <table class="table modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Unit Price</th>
+                                            <th class="text-center">Qty</th>
+                                            <th class="text-end">Subtotal</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.CartItems)
+                                        {
+                                            <tr>
+                                                <td class="fw-semibold text-dark">@item.ProductName</td>
+                                                <td>@item.UnitPrice.ToString("C")</td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-light text-dark border px-3 py-2">@item.Quantity</span>
+                                                </td>
+                                                <td class="text-end fw-bold text-primary">@item.Subtotal.ToString("C")</td>
+                                                <td class="text-end">
+                                                    <form asp-action="RemoveFromCart" method="post" class="d-inline">
+                                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                                        <button type="submit" class="btn btn-remove-item" title="Remove Item">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Checkout Form -->
+                            <form asp-action="Checkout" method="post" class="border-top pt-4 mt-2">
+                                @Html.AntiForgeryToken()
+                                <div class="mb-4">
+                                    <label asp-for="CustomerId" class="form-label fw-semibold text-dark mb-2">
+                                        <i class="bi bi-person-fill me-1"></i> Assign to Customer
+                                    </label>
+                                    <select asp-for="CustomerId" class="form-select modern-select" required>
+                                        <option value="">-- Select a Customer --</option>
+                                        @foreach (var c in ViewBag.Customers as IEnumerable<logistics.Models.Customer>)
+                                        {
+                                            <option value="@c.Id">@c.FullName (@c.Email)</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="CustomerId" class="text-danger small mt-1 d-block"></span>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-modern-success">
+                                        <i class="bi bi-check-circle-fill me-2"></i>Complete Order & Generate Shipment
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <!-- Elegant Empty Cart State -->
+                            <div class="empty-cart-state text-center">
+                                <div class="bg-white rounded-circle d-inline-flex p-4 mb-3 shadow-sm">
+                                    <i class="bi bi-cart-x display-4 text-muted"></i>
+                                </div>
+                                <h5 class="fw-bold text-dark mb-2">Your cart is empty</h5>
+                                <p class="text-muted mb-0">Select a product and quantity from the left panel to get started.</p>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
     }
-}
