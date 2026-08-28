@@ -14,15 +14,14 @@
         margin-bottom: 0;
     }
 
-        /* ELEGANT & CONTRASTING HEADER */
         .modern-table thead th {
-            background: #1e293b; /* Deep professional slate/dark blue */
-            border-bottom: 3px solid #0d6efd; /* Subtle primary brand accent */
+            background: #1e293b;
+            border-bottom: 3px solid #0d6efd;
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.8rem;
             letter-spacing: 1.2px;
-            color: #f8f9fa; /* Crisp white text for high contrast */
+            color: #f8f9fa;
             padding: 1.25rem 1.5rem;
             white-space: nowrap;
         }
@@ -48,7 +47,6 @@
             white-space: nowrap;
         }
 
-    /* UI Enhancements */
     .search-container {
         position: relative;
     }
@@ -146,7 +144,7 @@
             padding: 1rem 0.75rem;
             font-size: 0.9rem;
         }
-            /* Sticky first column for mobile scrolling */
+
             .modern-table th:first-child,
             .modern-table td:first-child {
                 position: sticky;
@@ -158,9 +156,20 @@
 
         .modern-table th:first-child {
             z-index: 3;
-            background: #1e293b !important; /* Keep header dark on mobile sticky */
+            background: #1e293b !important;
         }
     }
+
+    /* Loading Spinner for Dynamic Search */
+    .search-loading {
+        display: none;
+        text-align: center;
+        padding: 3rem;
+    }
+
+        .search-loading.active {
+            display: block;
+        }
 </style>
 
 <div class="container-fluid px-3 px-md-4 py-4">
@@ -174,14 +183,20 @@
         </div>
         <div class="col-12 col-md-6 text-md-end">
             <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end">
-                <!-- Search Form -->
-                <form asp-action="Index" method="get" class="d-flex gap-2">
-                    <div class="search-container" style="width: 100%; max-width: 250px;">
+                <!-- Dynamic Search Input (No Form Tag to Prevent Page Reload) -->
+                <div class="d-flex gap-2" style="max-width: 350px; width: 100%;">
+                    <div class="search-container flex-grow-1">
                         <i class="bi bi-search search-icon"></i>
-                        <input type="text" name="searchString" class="form-control search-input" placeholder="Search by customer..." />
+                        <input type="text" id="dynamicSearchInput" value="@ViewData["CurrentFilter"]"
+                               class="form-control search-input" placeholder="Type customer or ID..." autocomplete="off" />
                     </div>
-                    <button type="submit" class="btn btn-primary btn-modern-primary px-4">Search</button>
-                </form>
+                    @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"] as string))
+                    {
+                        <button type="button" id="clearSearchBtn" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="border-radius: 10px; width: 46px;">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    }
+                </div>
 
                 <!-- Track Button -->
                 <a asp-action="Track" class="btn btn-modern-outline">
@@ -201,76 +216,17 @@
         </div>
     }
 
-    <!-- Table Section -->
-    <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
-        <div class="card-body p-0">
-            @if (Model != null && Model.Any())
-            {
-                <div class="table-responsive">
-                    <table class="table modern-table mb-0">
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Order Date</th>
-                                <th>Total Amount</th>
-                                <th>Status</th>
-                                <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var shipment in Model)
-                            {
-                                <tr>
-                                    <td>
-                                        <div class="fw-bold text-dark">#@shipment.OrderId</div>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold text-dark">@shipment.CustomerName</div>
-                                    </td>
-                                    <td>
-                                        <span class="text-muted">@shipment.OrderDate.ToString("MMM dd, yyyy")</span>
-                                    </td>
-                                    <td>
-                                        <span class="fw-bold text-success">@shipment.TotalAmount.ToString("C")</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-warning bg-opacity-10 text-dark px-3 py-2">
-                                            <i class="bi bi-clock-fill me-1"></i>@shipment.CurrentStatus
-                                        </span>
-                                    </td>
-                                    <td class="text-end">
-                                        <a asp-action="AssignDriver" asp-route-id="@shipment.ShipmentId" class="btn btn-assign-driver">
-                                            <i class="bi bi-person-plus-fill me-2"></i>Assign Driver
-                                        </a>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <!-- Premium Empty State -->
-                <div class="empty-state text-center">
-                    <div class="bg-white rounded-circle d-inline-flex p-4 mb-3 shadow-sm">
-                        <i class="bi bi-truck display-4 text-muted"></i>
-                    </div>
-                    <h4 class="fw-bold text-dark mb-2">All caught up!</h4>
-                    <p class="text-muted mb-0">
-                        @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"] as string))
-                        {
-                            <span>No pending shipments found matching "<strong>@ViewData["CurrentFilter"]</strong>".</span>
-                        }
-                        else
-                        {
-                            <span>There are no pending shipments at this time. New orders will appear here.</span>
-                        }
-                    </p>
-                </div>
-            }
+    <!-- Dynamic Table Container -->
+    <div id="shipment-table-wrapper">
+        <!-- Loading Spinner (Hidden by default) -->
+        <div id="search-loading" class="search-loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
         </div>
+
+        <!-- Initial Render of the Table -->
+        @await Html.PartialAsync("_PendingShipmentTable", Model)
     </div>
 </div>
 
@@ -278,4 +234,63 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('dynamicSearchInput');
+            const tableContainer = document.getElementById('shipment-table-wrapper');
+            const loadingSpinner = document.getElementById('search-loading');
+            const clearBtn = document.getElementById('clearSearchBtn');
+
+            let debounceTimer = null;
+
+            // Listen for typing
+            searchInput.addEventListener('input', function() {
+                const query = this.value;
+
+                // Clear previous timer (debounce)
+                clearTimeout(debounceTimer);
+
+                // Show loading state
+                loadingSpinner.classList.add('active');
+
+                // Wait 300ms after user stops typing before fetching
+                debounceTimer = setTimeout(async () => {
+                    try {
+                        const response = await fetch(`/Shipments/SearchShipments?searchString=${encodeURIComponent(query)}`);
+                        if (response.ok) {
+                            const html = await response.text();
+                            // Replace only the table part
+                            tableContainer.innerHTML = html;
+
+                            // Re-attach the clear button logic if it exists in the new HTML
+                            const newClearBtn = document.getElementById('clearSearchBtn');
+                            if (newClearBtn) {
+                                newClearBtn.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    searchInput.value = '';
+                                    searchInput.dispatchEvent(new Event('input'));
+                                    searchInput.focus();
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Dynamic search failed:', error);
+                    } finally {
+                        // Hide loading state
+                        loadingSpinner.classList.remove('active');
+                    }
+                }, 300); // 300ms debounce
+            });
+
+            // Initial clear button logic (if page loaded with a filter)
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    searchInput.value = '';
+                    searchInput.dispatchEvent(new Event('input'));
+                    searchInput.focus();
+                });
+            }
+        });
+    </script>
 }

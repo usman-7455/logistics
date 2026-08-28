@@ -31,6 +31,26 @@ namespace logistics.Controllers
            
             return View(shipments);
         }
+        // GET: /Shipments/SearchShipments (Dynamic AJAX Endpoint)
+        public async Task<IActionResult> SearchShipments(string searchString)
+        {
+            var shipments = await _shipmentService.GetPendingShipmentsAsync();
+            ViewData["CurrentFilter"] = searchString;
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                // Remove spaces and make lowercase for accurate "StartsWith" matching
+                var cleanSearch = searchString.Replace(" ", "").ToLower();
+
+                shipments = shipments.Where(s =>
+                    s.CustomerName.Replace(" ", "").ToLower().StartsWith(cleanSearch) ||
+                    s.OrderId.ToString().StartsWith(cleanSearch)
+                ).ToList();
+            }
+
+            // Return only the partial view containing the table
+            return PartialView("_PendingShipmentTable", shipments);
+        }
 
         // GET: /Shipments/AssignDriver/5
         public IActionResult AssignDriver(int id)

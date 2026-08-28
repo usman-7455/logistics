@@ -1,0 +1,97 @@
+﻿@model List<logistics.Models.Product>
+
+@if (Model != null && Model.Any())
+{
+    <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table modern-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Unit Price</th>
+                            <th>Stock Level</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            string rowClass = product.StockQuantity < 5 ? "low-stock-row" : "";
+                            <tr class="@rowClass">
+                                <td>
+                                    <div class="fw-semibold text-dark">@product.Name</div>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-primary fs-5">@product.Price.ToString("C")</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="status-indicator @(product.StockQuantity < 5 ? "bg-warning" : "bg-success")"></span>
+                                        <span class="fw-medium">@product.StockQuantity units</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (product.StockQuantity == 0)
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2">Out of Stock</span>
+                                    }
+                                    else if (product.StockQuantity < 5)
+                                    {
+                                        <span class="badge bg-warning bg-opacity-10 text-dark px-3 py-2">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Low Stock
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">
+                                            <i class="bi bi-check-circle-fill me-1"></i>In Stock
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subtle footer info -->
+    <div class="text-muted mt-3 small d-none d-md-block">
+        <i class="bi bi-info-circle me-1"></i>
+        Showing @Model.Count products. Rows highlighted in yellow require immediate restocking.
+    </div>
+}
+else
+{
+    <!-- Premium Empty State -->
+    <div class="empty-state text-center">
+        <div class="bg-white rounded-circle d-inline-flex p-4 mb-3 shadow-sm">
+            <i class="bi bi-search display-4 text-muted"></i>
+        </div>
+        <h4 class="fw-bold text-dark mb-2">No products found</h4>
+        <p class="text-muted mb-4">
+            @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"] as string))
+            {
+                <span>We couldn't find any products matching "<strong>@ViewData["CurrentFilter"]</strong>".</span>
+            }
+            else
+            {
+                <span>Your inventory is currently empty. Get started by adding your first product!</span>
+            }
+        </p>
+        @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"] as string))
+        {
+            <button type="button" id="clearSearchBtn" class="btn btn-outline-primary px-4">
+                <i class="bi bi-x-circle me-2"></i>Clear Search
+            </button>
+        }
+        else
+        {
+            <a asp-action="Create" class="btn btn-primary px-4">
+                <i class="bi bi-plus-lg me-2"></i>Add Your First Product
+            </a>
+        }
+    </div>
+}
