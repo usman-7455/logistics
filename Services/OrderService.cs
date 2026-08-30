@@ -17,7 +17,7 @@ namespace logistics.Services
         public async Task<List<Customer>> GetCustomersAsync()
         {
             return await _context.Customers
-                .AsNoTracking() // Always fetch fresh data
+                .AsNoTracking() 
                 .OrderBy(c => c.FullName)
                 .ToListAsync();
         }
@@ -37,7 +37,7 @@ namespace logistics.Services
 
             try
             {
-                // 1. Validate Stock Availability
+                //  Validate Stock Availability
                 foreach (var item in cartItems)
                 {
                     var product = await _context.Products.FindAsync(item.ProductId);
@@ -48,7 +48,7 @@ namespace logistics.Services
                     }
                 }
 
-                // 2. Create the Order Entity
+                //  Create the Order Entity
                 var order = new Order
                 {
                     CustomerId = customerId,
@@ -60,7 +60,7 @@ namespace logistics.Services
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
-                // 3. Create Order Items and Deduct Stock
+                //  Create Order Items and Deduct Stock
                 foreach (var item in cartItems)
                 {
                     var orderItem = new OrderItem
@@ -68,7 +68,7 @@ namespace logistics.Services
                         OrderId = order.Id,
                         ProductId = item.ProductId,
                         Quantity = item.Quantity,
-                        UnitPrice = item.UnitPrice // Note: Ensure your model has UnitPrice, not Price
+                        UnitPrice = item.UnitPrice 
                     };
                     _context.OrderItems.Add(orderItem);
 
@@ -76,18 +76,18 @@ namespace logistics.Services
                     product.StockQuantity -= item.Quantity;
                 }
 
-                await _context.SaveChangesAsync(); // Save OrderItems and Stock changes
+                await _context.SaveChangesAsync(); 
 
-                // 4. Create the Pending Shipment
+                
                 var shipment = new Shipment
                 {
                     OrderId = order.Id,
                     ShipmentStatus = ShipmentStatus.InTransit
-                    // TrackingCode and DriverName are intentionally left null for now
+                 
                 };
 
                 _context.Shipments.Add(shipment);
-                await _context.SaveChangesAsync(); // Save Shipment
+                await _context.SaveChangesAsync(); 
 
                 await transaction.CommitAsync();
                 return (true, "Order created successfully!");
@@ -101,8 +101,7 @@ namespace logistics.Services
 
         public async Task<List<OrderSummaryViewModel>> GetAllOrdersAsync()
         {
-            // MAGIC FIX: .AsNoTracking() forces EF Core to bypass its memory cache 
-            // and always pull the absolute latest data from the SQL database.
+            
             var orders = await _context.Orders
                 .AsNoTracking()
                 .Include(o => o.Customer)
@@ -113,7 +112,7 @@ namespace logistics.Services
 
             foreach (var order in orders)
             {
-                // Also use AsNoTracking() here to ensure the shipment lookup is fresh
+                
                 var trackingCode = await _context.Shipments
                     .AsNoTracking()
                     .Where(s => s.OrderId == order.Id)

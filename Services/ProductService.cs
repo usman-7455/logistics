@@ -14,7 +14,7 @@ namespace logistics.Services
             _context = context;
         }
 
-        // This now perfectly matches the interface
+       
         public async Task<(List<Product> Products, int TotalCount)> GetProductsAsync(
             string searchString = null,
             int pageNumber = 1,
@@ -38,7 +38,7 @@ namespace logistics.Services
             return (products, totalCount);
         }
 
-        // FIXED: Renamed from CreateAllProductAsync to CreateProductAsync
+        
         public async Task<bool> CreateProductAsync(CreateProductViewModel model)
         {
             var product = new Product

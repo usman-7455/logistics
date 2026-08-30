@@ -11,7 +11,7 @@ namespace logistics.Services.Background
     {
         private readonly ILogger<ShipmentDeliveryService> _logger;
         private readonly IServiceProvider _serviceProvider;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(1); // Check every minute
+        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(1); 
 
         public ShipmentDeliveryService(ILogger<ShipmentDeliveryService> logger, IServiceProvider serviceProvider)
         {
@@ -21,25 +21,25 @@ namespace logistics.Services.Background
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("✅ Shipment Delivery Auto-Complete Service is starting...");
+            _logger.LogInformation(" Shipment Delivery Auto-Complete Service is starting...");
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    _logger.LogInformation("⏰ Checking for shipments to auto-complete...");
+                    _logger.LogInformation(" Checking for shipments to auto-complete...");
                     await ProcessCompletedShipmentsAsync(stoppingToken);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "❌ Error occurred while processing completed shipments");
+                    _logger.LogError(ex, " Error occurred while processing completed shipments");
                 }
 
-                // Wait for the next check interval
+               
                 await Task.Delay(_checkInterval, stoppingToken);
             }
 
-            _logger.LogInformation("🛑 Shipment Delivery Auto-Complete Service is stopping.");
+            _logger.LogInformation(" Shipment Delivery Auto-Complete Service is stopping.");
         }
 
         private async Task ProcessCompletedShipmentsAsync(CancellationToken stoppingToken)
@@ -60,11 +60,11 @@ namespace logistics.Services.Background
 
             if (!shipmentsToComplete.Any())
             {
-                _logger.LogInformation("✓ No shipments ready for auto-completion at {Time}", currentTime);
+                _logger.LogInformation(" No shipments ready for auto-completion at {Time}", currentTime);
                 return;
             }
 
-            _logger.LogInformation("📦 Found {Count} shipments to mark as delivered", shipmentsToComplete.Count);
+            _logger.LogInformation(" Found {Count} shipments to mark as delivered", shipmentsToComplete.Count);
 
             foreach (var shipment in shipmentsToComplete)
             {
@@ -77,10 +77,10 @@ namespace logistics.Services.Background
                     if (shipment.Order != null)
                     {
                         shipment.Order.Status = OrderStatus.Delivered;
-                        _logger.LogInformation("✓ Order #{OrderId} marked as Delivered", shipment.OrderId);
+                        _logger.LogInformation(" Order #{OrderId} marked as Delivered", shipment.OrderId);
                     }
 
-                    _logger.LogInformation("✓ Shipment {TrackingCode} auto-marked as Delivered (was due at {ETA})",
+                    _logger.LogInformation("Shipment {TrackingCode} auto-marked as Delivered (was due at {ETA})",
                         shipment.TrackingCode ?? $"#{shipment.Id}",
                         shipment.EstimatedDeliveryTime);
                 }
@@ -92,7 +92,7 @@ namespace logistics.Services.Background
 
             // Save all changes to the database
             var recordsAffected = await context.SaveChangesAsync(stoppingToken);
-            _logger.LogInformation("💾 Successfully auto-completed {Count} shipments ({Records} records updated)",
+            _logger.LogInformation(" Successfully auto-completed {Count} shipments ({Records} records updated)",
                 shipmentsToComplete.Count, recordsAffected);
         }
     }

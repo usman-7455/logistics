@@ -2,7 +2,7 @@
 
 namespace logistics.Models.ViewModels
 {
-    // 1. For the list of shipments waiting for dispatch
+    
     public class PendingShipmentViewModel
     {
         public int ShipmentId { get; set; }
@@ -13,7 +13,7 @@ namespace logistics.Models.ViewModels
         public string CurrentStatus { get; set; }
     }
 
-    // 2. For the "Assign Driver" form
+   
     public class AssignDriverViewModel
     {
         public int ShipmentId { get; set; }
@@ -28,7 +28,7 @@ namespace logistics.Models.ViewModels
         public DateTime MinDeliveryDate { get; set; }
     }
 
-    // 3. For the Tracking Lookup result
+   
     public class TrackingResultViewModel
     {
         public string TrackingCode { get; set; }
@@ -36,11 +36,11 @@ namespace logistics.Models.ViewModels
         public string DriverName { get; set; }
         public DateTime? EstimatedDeliveryTime { get; set; }
 
-        // Customer Details
+        
         public string CustomerName { get; set; }
         public string CustomerEmail { get; set; }
 
-        // Order Details
+       
         public List<string> OrderItemsSummary { get; set; } = new List<string>();
     }
 }

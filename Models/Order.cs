@@ -14,7 +14,7 @@ namespace logistics.Models
 
         [Required]
         public int CustomerId { get; set; }
-        public Customer Customer { get; set; } // Navigation property
+        public Customer Customer { get; set; } 
 
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
@@ -23,7 +23,7 @@ namespace logistics.Models
 
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
-        // Navigation property for OrderItems
+      
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }
